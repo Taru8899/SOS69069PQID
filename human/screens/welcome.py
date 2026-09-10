@@ -10,6 +10,7 @@ from human.theme import BrandButton, BrandInput, Card, show_popup, PageScroll
 from human.app_meta import format_version
 from human import texts as T
 from human import identity as ident
+from human import wallet_storage as hws
 from pure_crypto import privkey_to_pubkey, keccak256
 
 MOTTO = (
@@ -82,6 +83,7 @@ class HumanWelcomeScreen(Screen):
                 return
             idn = ident.generate_identity()
             ident.save_identity(app.user_data_dir, idn)
+            hws.set_unlocked(app.user_data_dir, True, idn)
             show_popup("Created", f"Fingerprint\n{idn['fingerprint']}")
             self.manager.current = "human_home"
         except Exception as e:
@@ -112,6 +114,7 @@ class HumanWelcomeScreen(Screen):
             }
             app = App.get_running_app()
             ident.save_identity(app.user_data_dir, idn)
+            hws.set_unlocked(app.user_data_dir, True, idn)
             show_popup("Imported", f"Fingerprint\n{fp}")
             self.manager.current = "human_home"
         except Exception as e:

@@ -3,12 +3,16 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.metrics import dp
+import json
+
 from human.theme import PageScroll, HeaderBar, BrandButton, CopyableText, Card, show_popup
 from human.screens.nav import HumanNavBar
 from human import texts as T
 from human import identity as ident
 from human import record as rec
 from human import record_store as rstore
+from human import wallet_storage as hws
+
 
 class HumanRecordsScreen(Screen):
     def __init__(self, **kwargs):
@@ -42,13 +46,25 @@ class HumanRecordsScreen(Screen):
             return
         for r in rows[:30]:
             card = Card()
-            card.add_widget(CopyableText(
-                text=f"{r.get('id', '—')}\n{r.get('activity_type', '')}  hash={str(r.get('hash', ''))[:18]}…",
-                color=T.TEXT_SEC, height=dp(56)))
+            body = (
+                f"{r.get('id', '—')}\n"
+                f"{r.get('activity_type', '')}\n"
+                f"hash={r.get('hash', '')}"
+            )
+            card.add_widget(CopyableText(text=body, color=T.TEXT_SEC, height=dp(80)))
             self.list_box.add_widget(card)
 
     def create_rec(self, *_):
         app = App.get_running_app()
+        if not hws.is_unlocked(app.user_data_dir):
+            # restore if file exists
+            idn = ident.load_identity(app.user_data_dir)
+            if idn:
+                hws.set_unlocked(app.user_data_dir, True, idn)
+            else:
+                show_popup("Not logged in", "Create or import identity on welcome first.")
+                self.manager.current = "human_welcome"
+                return
         idn = ident.load_identity(app.user_data_dir)
         if not idn:
             show_popup("Need identity", "Create human identity first.")
@@ -56,7 +72,14 @@ class HumanRecordsScreen(Screen):
             return
         body = rec.build_record(idn["public_key"], "presence", 1)
         h = rec.record_hash(body)
-        entry = {"id": "69069-" + body["serial"][:8].upper(), "hash": h, "activity_type": "presence", "record": body, "state": "SIGNED_LOCAL"}
+        entry = {
+            "id": "69069-" + body["serial"][:8].upper(),
+            "hash": h,
+            "activity_type": "presence",
+            "record": body,
+            "state": "SIGNED_LOCAL",
+            "issuer_fingerprint": idn.get("fingerprint"),
+        }
         rstore.save_record(app.user_data_dir, entry)
-        show_popup("Record saved", f"{entry['id']}\n{h[:22]}…")
+        show_popup("Record saved", f"{entry['id']}\n{h}")
         self.refresh()
