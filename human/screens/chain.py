@@ -12,6 +12,7 @@ from human import submit_log as slog
 from human import identity as ident
 from human import wallet_storage as hws
 from human import record_store as rstore
+from human import keys as ekeys
 
 
 class HumanChainScreen(Screen):
@@ -44,6 +45,9 @@ class HumanChainScreen(Screen):
         mid.add_widget(nav)
         self.hashes = CopyableText(text="", color=GREEN_BR, height=dp(160))
         mid.add_widget(self.hashes)
+        wallet_b = BrandButton(text="CONNECT / MANAGE WALLET", bg_color=INPUT_BG)
+        wallet_b.bind(on_release=self.go_wallet)
+        mid.add_widget(wallet_b)
         sub = BrandButton(text="OPTIONAL SUBMIT LATEST RECORD", bg_color=GREEN)
         sub.bind(on_release=self.submit_latest)
         mid.add_widget(sub)
@@ -69,7 +73,17 @@ class HumanChainScreen(Screen):
         )
         addr = cs.try_get_main_payer_address()
         sess = "logged in" if hws.is_unlocked(app.user_data_dir) else "logged out"
-        self.body.text = cs.describe_submit_bridge() + f"\nHuman session: {sess}\nGas payer: {addr or '(none)'}"
+        meta = ekeys.get_wallet_meta(app.user_data_dir)
+        if not meta:
+            wstate = "no wallet connected — tap CONNECT / MANAGE WALLET"
+        elif not ekeys.is_unlocked():
+            wstate = "wallet connected but locked — tap CONNECT / MANAGE WALLET to unlock"
+        else:
+            wstate = "wallet connected + unlocked, ready to submit"
+        self.body.text = (
+            cs.describe_submit_bridge()
+            + f"\nHuman session: {sess}\nWallet: {wstate}\nGas payer: {addr or '(none)'}"
+        )
         rows, self._page, pages, total = slog.page(app.user_data_dir, self._page)
         self.page_lbl.text = f"Submit log page {self._page + 1} / {pages} ({total})"
         if not rows:
@@ -83,8 +97,18 @@ class HumanChainScreen(Screen):
                 )
             self.hashes.text = "\n".join(lines)
 
+    def go_wallet(self, *_):
+        App.get_running_app().sm.current = "human_wallet"
+
     def submit_latest(self, *_):
         app = App.get_running_app()
+        if not ekeys.get_cached_key() and not cs.try_get_main_payer_key():
+            show_popup(
+                "No wallet",
+                "Connect and unlock a wallet first (CONNECT / MANAGE WALLET) "
+                "— on-chain submit is optional and needs a gas payer.",
+            )
+            return
         recs = rstore.list_records(app.user_data_dir)
         if not recs:
             show_popup("Empty", "Create a record first")

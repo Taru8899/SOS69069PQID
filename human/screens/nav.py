@@ -13,6 +13,7 @@ _ITEMS = [
     ("human_records", "RECORDS", T.ORANGE),
     ("human_attest", "ATTEST", get_color_from_hex("#a78bfa")),
     ("human_chain", "CHAIN", get_color_from_hex("#c084fc")),
+    ("human_wallet", "WALLET", get_color_from_hex("#facc15")),
     ("human_pqid", "PQID", T.BLUE),
 ]
 
