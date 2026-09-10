@@ -16,5 +16,5 @@ android.minapi = 21
 android.ndk = 25b
 android.accept_sdk_license = True
 android.archs = arm64-v8a
-requirements = python3,kivy
+requirements = python3,kivy,requests,urllib3,certifi,charset-normalizer,idna
 preset = 1
