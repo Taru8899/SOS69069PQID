@@ -23,7 +23,7 @@ MOTTO = (
 
 LINKS = (
     ("sos69069.com", "https://sos69069.com"),
-    ("SOS 69069 PQID on GitHub", "https://github.com/Taru8899/69069"),
+    ("SOS 69069 PQID on GitHub", "https://github.com/Taru8899/SOS69069PQID"),
     ("SOS 69069 on Etherscan", "https://etherscan.io/token/0x7373DBC24Dcd785896E8Ac3d5372c6ced9B75a8A"),
 )
 
