@@ -5,10 +5,11 @@ from typing import List
 RECORDS_DIR = "human_records"
 ATTEST_DIR = "human_attestations"
 IDENTITY_FILE = "human_identity.json"
+SESSION_FILE = "human_session.json"
 
 def clear_human_data(user_data_dir: str) -> list:
     removed = []
-    for name in (IDENTITY_FILE,):
+    for name in (IDENTITY_FILE, SESSION_FILE):
         path = os.path.join(user_data_dir, name)
         if os.path.isfile(path):
             try:
@@ -24,6 +25,11 @@ def clear_human_data(user_data_dir: str) -> list:
                 removed.append(dname + "/")
             except Exception:
                 pass
+    try:
+        from human import wallet_storage as hws
+        hws.logout_session(user_data_dir)
+    except Exception:
+        pass
     return removed
 
 def list_records(user_data_dir: str) -> List[dict]:
