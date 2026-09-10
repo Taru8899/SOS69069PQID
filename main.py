@@ -19,7 +19,17 @@ class PQIDApp(App):
     sm = None
 
     def get_payer_key(self):
-        return None
+        """Optional connected wallet used to sign/pay gas for on-chain
+        submits. Returns None until the user connects + unlocks a wallet
+        on the WALLET screen; everything else in the app works without it."""
+        try:
+            from human import keys as ekeys
+            key = ekeys.get_cached_key()
+            if key:
+                return key
+        except Exception:
+            pass
+        return self.private_key
 
     def build(self):
         try:
@@ -46,6 +56,7 @@ class PQIDApp(App):
             ("human_records", "human.screens.records", "HumanRecordsScreen"),
             ("human_attest", "human.screens.attest", "HumanAttestScreen"),
             ("human_chain", "human.screens.chain", "HumanChainScreen"),
+            ("human_wallet", "human.screens.keys", "HumanWalletScreen"),
             ("human_pqid", "human.screens.pqid", "HumanPqidScreen"),
         ]
         loaded = []
