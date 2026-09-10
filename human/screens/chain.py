@@ -1,4 +1,3 @@
-from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -28,5 +27,5 @@ class HumanChainScreen(Screen):
     def on_pre_enter(self, *a):
         addr = cs.try_get_main_payer_address()
         self.body.text = cs.describe_submit_bridge() + "\n\n" + (
-            f"Main gas payer: {addr}" if addr else "Main gas payer: (not unlocked)"
+            f"Gas payer: {addr}" if addr else "Gas payer: (not configured in standalone)"
         )
