@@ -1,4 +1,3 @@
-"""PQID rpc facade — re-exports main rpc when available for chain checks."""
 try:
     import rpc as main_rpc
 except Exception:

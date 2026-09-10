@@ -1,5 +1,3 @@
-"""PQID session flag (identity file is the store; logout clears memory only)."""
-# Identity persistence is human/identity.py. This module marks in-app session.
 _session_unlocked = False
 
 def set_unlocked(v: bool):

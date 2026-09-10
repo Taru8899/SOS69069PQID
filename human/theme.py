@@ -1,4 +1,4 @@
-"""PQID UI chrome — self-contained (works embedded and standalone)."""
+"""PQID UI chrome — self-contained."""
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -89,26 +89,15 @@ class CopyableText(TextInput):
         kwargs.setdefault("readonly", True)
         kwargs.setdefault("multiline", True)
         h = kwargs.pop("height", dp(40))
+        col = kwargs.pop("color", TEXT)
         super().__init__(**kwargs)
         self.size_hint_y = None
         self.height = h
         self.background_normal = ""
         self.background_active = ""
         self.background_color = (0, 0, 0, 0)
-        self.foreground_color = kwargs.get("color", TEXT)
+        self.foreground_color = col
         self.padding = [0, 0]
-
-
-class LinkButton(Button):
-    def __init__(self, text="", url="", **kwargs):
-        super().__init__(text=text, **kwargs)
-        self.url = url
-        self.size_hint_y = None
-        self.height = dp(36)
-        self.background_normal = ""
-        self.background_color = (0, 0, 0, 0)
-        self.color = GREEN_BR
-        self.bold = True
 
 
 def show_popup(title, message):

@@ -1,4 +1,3 @@
-"""Mutual attestation helpers (v0 local)."""
 from __future__ import annotations
 import json, os, time
 

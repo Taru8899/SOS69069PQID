@@ -1,4 +1,4 @@
-"""Human identity (PQ-ready API; interim secp256k1 via pure_crypto)."""
+"""Human identity (PQ-ready API; interim secp256k1)."""
 from __future__ import annotations
 import json, os, time, secrets
 from typing import Optional

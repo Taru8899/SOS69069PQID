@@ -1,4 +1,4 @@
-"""SOS 69069 PQID branding (shared by embedded + standalone)."""
+"""SOS 69069 PQID branding."""
 APP_NAME = "SOS 69069 PQID"
 APP_DISPLAY_VERSION = "1.6.9.0.6.9"
 APP_SHORT = "PQID"

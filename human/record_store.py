@@ -1,4 +1,3 @@
-"""Local PQID data only — never touches main chain caches."""
 from __future__ import annotations
 import json, os, shutil, time
 from typing import List
@@ -6,11 +5,10 @@ from typing import List
 RECORDS_DIR = "human_records"
 ATTEST_DIR = "human_attestations"
 IDENTITY_FILE = "human_identity.json"
-SESSION_NOTE = "human_session_note.json"
 
 def clear_human_data(user_data_dir: str) -> list:
     removed = []
-    for name in (IDENTITY_FILE, SESSION_NOTE):
+    for name in (IDENTITY_FILE,):
         path = os.path.join(user_data_dir, name)
         if os.path.isfile(path):
             try:
