@@ -1,12 +1,16 @@
-"""PQID UI chrome — self-contained."""
+"""PQID UI — pinned header (logo + title), copyable text clears selection."""
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.image import Image
 from kivy.uix.popup import Popup
 from kivy.metrics import dp
 from kivy.utils import get_color_from_hex
+from kivy.clock import Clock
+from kivy.resources import resource_find
+import os
 
 TEXT = get_color_from_hex("#f1f5f9")
 TEXT_SEC = get_color_from_hex("#cbd5e1")
@@ -30,11 +34,34 @@ def PageScroll(**kwargs):
     return ScrollView(**kwargs)
 
 
+def _logo_path():
+    for n in ("logo_smooth.png", "sos69069.png", "icon.png"):
+        p = resource_find(n)
+        if p and os.path.isfile(p):
+            return p
+        for base in (os.getcwd(), os.path.dirname(os.path.dirname(os.path.abspath(__file__)))):
+            c = os.path.join(base, n)
+            if os.path.isfile(c):
+                return c
+    return None
+
+
 class HeaderBar(BoxLayout):
+    """Pinned: SOS logo left + page title."""
     LEFT = 10
 
     def __init__(self, title="", **kwargs):
-        super().__init__(orientation="horizontal", size_hint_y=None, height=dp(44), spacing=dp(8), **kwargs)
+        super().__init__(orientation="horizontal", size_hint_y=None, height=dp(48),
+                         spacing=dp(8), padding=[dp(4), 0, 0, 0], **kwargs)
+        path = _logo_path()
+        if path:
+            try:
+                self.add_widget(Image(source=path, size_hint=(None, 1), width=dp(40),
+                                      allow_stretch=True, keep_ratio=True))
+            except Exception:
+                self.add_widget(Label(text="SOS", color=GREEN_BR, bold=True, size_hint_x=None, width=dp(40)))
+        else:
+            self.add_widget(Label(text="SOS", color=GREEN_BR, bold=True, size_hint_x=None, width=dp(40)))
         self.add_widget(Label(text=str(title), color=TEXT, bold=True, font_size=dp(16), halign="left"))
 
 
@@ -98,6 +125,24 @@ class CopyableText(TextInput):
         self.background_color = (0, 0, 0, 0)
         self.foreground_color = col
         self.padding = [0, 0]
+        self.bind(focus=self._on_focus)
+
+    def _clear_sel(self, *a):
+        try:
+            self.select_text(0, 0)
+            self.cursor = (len(self.text or ""), 0)
+        except Exception:
+            pass
+
+    def _on_focus(self, inst, val):
+        if not val:
+            Clock.schedule_once(self._clear_sel, 0.05)
+
+    def on_touch_up(self, touch):
+        r = super().on_touch_up(touch)
+        if self.collide_point(*touch.pos):
+            Clock.schedule_once(self._clear_sel, 0.35)
+        return r
 
 
 def show_popup(title, message):
