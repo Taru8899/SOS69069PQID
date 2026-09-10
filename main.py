@@ -27,6 +27,14 @@ class PQIDApp(App):
         except Exception:
             pass
         self.title = APP_NAME
+        # restore human session if identity file present
+        try:
+            from human import identity as ident
+            from human import wallet_storage as hws
+            hws.restore_session(self.user_data_dir, ident.load_identity)
+        except Exception:
+            traceback.print_exc()
+
         sm = ScreenManager()
         self.sm = sm
 
@@ -61,7 +69,15 @@ class PQIDApp(App):
             ))
             return box
 
-        sm.current = "human_welcome" if "human_welcome" in loaded else loaded[0]
+        # If already logged in, go HOME; else welcome
+        try:
+            from human import wallet_storage as hws
+            if hws.is_unlocked(self.user_data_dir) and "human_home" in loaded:
+                sm.current = "human_home"
+            else:
+                sm.current = "human_welcome" if "human_welcome" in loaded else loaded[0]
+        except Exception:
+            sm.current = loaded[0]
         return sm
 
 
