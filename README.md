@@ -1,4 +1,4 @@
-# SOS 69069
+# SOS 69069 PQID
 SOS 69069 originates from verified Activity and Signatures.
 
 Whatever you do. SOS records. Whatever you do. Continue ...
@@ -15,7 +15,6 @@ Coffee me 0x1c10e6574ee696f54b21a611a21313e4714628ad
 SOS 69069html ZIP
 https://github.com/Taru8899/69069/blob/main/1.6.9.0.6.9-%20html69069.zip
 
-
 2.
 SOS 69069 APP v 1.6.9.0.6.9 light version arm64-v8a
 https://github.com/Taru8899/69069/blob/main/1.6.9.0.6.9-APP-sos69069-1.6.9-arm64-v8a-debug.apk
@@ -24,7 +23,7 @@ https://github.com/Taru8899/69069/blob/main/1.6.9.0.6.9-APP-sos69069-1.6.9-arm64
 SOS 69069 APP v 1.6.9.0.6.9 ZIP 
 https://github.com/Taru8899/69069/blob/main/1.6.9.0.6.9-APP-SOS69069APP.zip
 
-........................................................
+...........................................
 3.
 SOS 69069 PQID v 1.6.9.0.6.9
 https://github.com/Taru8899/69069/blob/main/1.6.9.0.6.9-PQID-sos69069pqid-1.6.9-arm64-v8a-debug.apk
