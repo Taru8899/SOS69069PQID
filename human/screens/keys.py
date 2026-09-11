@@ -10,6 +10,8 @@ from human.theme import (
 )
 from human.screens.nav import HumanNavBar
 from human import keys as ekeys
+from human import metrics as met
+from kivy.clock import Clock
 
 
 class HumanWalletScreen(Screen):
@@ -40,6 +42,16 @@ class HumanWalletScreen(Screen):
 
         self.status = CopyableText(text="", color=TEXT_SEC, height=dp(64))
         mid.add_widget(self.status)
+
+        mid.add_widget(Label(
+            text="Metrics for connected address (Push = signer, Trust = intendedTo)",
+            color=TEXT_MUTED, font_size=dp(11), size_hint_y=None, height=dp(20),
+        ))
+        self.metrics = CopyableText(text="", color=TEXT_SEC, height=dp(120))
+        mid.add_widget(self.metrics)
+        ref_b = BrandButton(text="REFRESH METRICS (+ CHAIN PQID CHECK)", bg_color=INPUT_BG)
+        ref_b.bind(on_release=self.refresh_metrics)
+        mid.add_widget(ref_b)
 
         mid.add_widget(Label(text="Passphrase (optional, encrypts key at rest)", color=TEXT_MUTED,
                               font_size=dp(11), size_hint_y=None, height=dp(18)))
@@ -89,6 +101,7 @@ class HumanWalletScreen(Screen):
         meta = ekeys.get_wallet_meta(app.user_data_dir)
         if not meta:
             self.status.text = "No wallet connected.\nImport a key or generate a new one below."
+            self.metrics.text = "Connect and unlock a wallet to load Push / Trust / Effective."
             return
         lock_state = "unlocked (ready to submit)" if ekeys.is_unlocked() else "locked (tap UNLOCK before submitting)"
         prot = "passphrase-protected" if meta.get("encrypted") else "no passphrase set"
@@ -96,6 +109,8 @@ class HumanWalletScreen(Screen):
             f"Connected: {meta.get('address')}\n"
             f"{prot} — {lock_state}"
         )
+        self.metrics.text = "Loading metrics…"
+        Clock.schedule_once(lambda dt: self._load_metrics(meta.get("address")), 0.05)
 
     def _clear_inputs(self):
         self.key_in.text = ""
@@ -151,3 +166,38 @@ class HumanWalletScreen(Screen):
         self._clear_inputs()
         show_popup("Disconnected", "Wallet removed from this device.")
         self.refresh()
+
+    def refresh_metrics(self, *_):
+        app = App.get_running_app()
+        meta = ekeys.get_wallet_meta(app.user_data_dir)
+        if not meta or not meta.get("address"):
+            show_popup("No wallet", "Connect a wallet first.")
+            return
+        self.metrics.text = "Refreshing (chain PQID scan may take a few seconds)…"
+        Clock.schedule_once(lambda dt: self._load_metrics(meta.get("address"), chain_check=True), 0.05)
+
+    def _load_metrics(self, address, chain_check=False):
+        app = App.get_running_app()
+        lines = []
+        # 1) Full on-chain contract stats
+        try:
+            onchain = met.stats_onchain(address)
+            lines.append(met.format_block("On-chain (SOS contract)", onchain))
+        except Exception as e:
+            lines.append(f"On-chain (SOS contract)\n  (error: {e})")
+        # 2) PQID local log
+        try:
+            local = met.stats_pqid_local(app.user_data_dir, address)
+            lines.append(met.format_block("PQID only (local log)", local))
+        except Exception as e:
+            lines.append(f"PQID only (local log)\n  (error: {e})")
+        # 3) Optional chain cross-check
+        if chain_check:
+            try:
+                chain = met.stats_pqid_chain(address)
+                lines.append(met.format_block("PQID only (chain cross-check)", chain))
+            except Exception as e:
+                lines.append(f"PQID only (chain cross-check)\n  (error: {e})")
+        else:
+            lines.append("PQID only (chain cross-check)\n  Tap REFRESH METRICS to scan SignatureRecorded logs (metadata PQID|).")
+        self.metrics.text = "\n\n".join(lines)
